@@ -31,9 +31,10 @@ public class Map{
         _height = height;
 
         _hexes = new HexElement[width, height];
-        for (int i = 0; i < width; ++i)
+
+        for (int i = 0 ; i < width ; ++i)
         {
-            for (int j = 0; j < height; ++j)
+            for (int j = 0 ; j < height ; ++j)
             {
                 _hexes[i, j] = new HexElement();
             }
@@ -45,30 +46,26 @@ public class Map{
         Vector3 origin = Vector3.zero;
         if (originValue.HasValue) origin = originValue.Value;
 
-        for( int row = 0 ; row < _width; ++row){
-            for (int col = 0; col < _height; ++col)
-            {
+        for (int row = 0 ; row < _width ; ++row) {
+            for (int col = 0 ; col < _height ; ++col) {
                 Vector3 position;
                 Quaternion rotation = Quaternion.Euler(270, 0, 0);
-                if (row % 2 == 0)
-                {
+                if (row % 2 == 0) {
                     position = origin + new Vector3(col * 3.0f, 0.0f, row * 1.5f * Mathf.Sqrt(3));
 
-                }
-                else
-                {
+                } else {
                     position = origin + new Vector3(col * 3.0f + 1.5f, 0.0f, row * 1.5f * Mathf.Sqrt(3));
                 }
                 _hexes[row,col].obj = gc.MakeObject(_hexPrism, position, rotation);
             }
         }
-        for (int i = 0; i < 10; ++i)
-        {
-            if (i != 4)
-            {
+
+        for (int i = 0; i < 10; ++i) {
+            if (i != 4) {
                 _hexes[5, i].SetNotPass();
             }
         }
+
         _hexes[4, 1].SetNotPass();
         _hexes[4, 3].SetNotPass();
         _hexes[3, 2].SetNotPass();
@@ -77,18 +74,16 @@ public class Map{
 
     public void SearchMap(GameObject obj, out int rowOutput, out int colOutput)
     {
-        for (int row = 0; row < _width; ++row)
-        {
-            for (int col = 0; col < _height; ++col)
-            {
-                if (_hexes[row, col].obj == obj)
-                {
+        for (int row = 0 ; row < _width ; ++row) {
+            for (int col = 0 ; col < _height ; ++col) {
+                if (_hexes[row, col].obj == obj) {
                     rowOutput = row;
                     colOutput = col;
                     return;
                 }
             }
         }
+
         rowOutput = -1;
         colOutput = -1;
     }
@@ -99,7 +94,7 @@ public class Map{
 
         check[row, col] = true;
         foreach(var neighbor in GetNeighbors(row,col)){
-            if( !check[(int)neighbor.x,(int)neighbor.y] ){
+            if( !check[(int)neighbor.x,(int)neighbor.y] ) {
                 yield return neighbor;
             }
             if (length > 1)
@@ -113,77 +108,54 @@ public class Map{
 
     public IEnumerable<Vector2> GetNeighbors( int row, int col )
     {
-        //List<Vector2> neighbors = new List<Vector2>();
-        if (row >= 0 && col >= 0)
-        {
-            if (row % 2 == 1)
-            {
-                if (row - 1 >= 0 && col + 1 < _height)
-                {
-                    //neighbors.Add(new Vector2(row - 1, col + 1));
-                    if (_hexes[row - 1, col + 1].canPass)
-                    {
+        if (row >= 0 && col >= 0) {
+            if (row % 2 == 1) {
+                if (row - 1 >= 0 && col + 1 < _height) {
+                    if (_hexes[row - 1, col + 1].canPass) {
                         yield return new Vector2(row - 1, col + 1);
                     }
                 }
-                if (row + 1 < _width && col + 1 < _height)
-                {
-                    //neighbors.Add(new Vector2(row + 1, col + 1));
-                    if (_hexes[row + 1, col + 1].canPass)
-                    {
+
+                if (row + 1 < _width && col + 1 < _height) {
+                    if (_hexes[row + 1, col + 1].canPass) {
                         yield return new Vector2(row + 1, col + 1);
                     }
                 }
-            }
-            else
-            {
-                if (row + 1 < _width && col - 1 >= 0)
-                {
-                    //neighbors.Add(new Vector2(row + 1, col - 1));
-                    if (_hexes[row + 1, col - 1].canPass)
-                    {
+
+            } else {
+                if (row + 1 < _width && col - 1 >= 0) {
+                    if (_hexes[row + 1, col - 1].canPass) {
                         yield return new Vector2(row + 1, col - 1);
                     }
                 }
-                if (row - 1 >= 0 && col - 1 >= 0)
-                {
-                    //neighbors.Add(new Vector2(row - 1, col - 1));
-                    if (_hexes[row - 1, col - 1].canPass)
-                    {
+
+                if (row - 1 >= 0 && col - 1 >= 0) {
+                    if (_hexes[row - 1, col - 1].canPass) {
                         yield return new Vector2(row - 1, col - 1);
                     }
                 }
             }
 
-            if (row + 1 < _height)
-            {
-                //neighbors.Add(new Vector2(row + 1, col));
-                if (_hexes[row + 1, col].canPass)
-                {
+            if (row + 1 < _height) {
+                if (_hexes[row + 1, col].canPass) {
                     yield return new Vector2(row + 1, col);
                 }
             }
-            if (col + 1 < _height)
-            {
-                //neighbors.Add(new Vector2(row, col + 1));
-                if (_hexes[row, col + 1].canPass)
-                {
+
+            if (col + 1 < _height) {
+                if (_hexes[row, col + 1].canPass) {
                     yield return new Vector2(row, col + 1);
                 }
             }
-            if (row - 1 >= 0)
-            {
-                //neighbors.Add(new Vector2(row - 1, col));
-                if (_hexes[row - 1, col].canPass)
-                {
+
+            if (row - 1 >= 0) {
+                if (_hexes[row - 1, col].canPass) {
                     yield return new Vector2(row - 1, col);
                 }
             }
-            if (col - 1 >= 0)
-            {
-                //neighbors.Add(new Vector2(row, col - 1));
-                if (_hexes[row, col - 1].canPass)
-                {
+
+            if (col - 1 >= 0) {
+                if (_hexes[row, col - 1].canPass) {
                     yield return new Vector2(row, col - 1);
                 }
             }
