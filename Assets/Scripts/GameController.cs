@@ -8,7 +8,6 @@ public class GameController : MonoBehaviour
     public GameObject hexPrism;
     public Material material;
 
-    //private GameObject[,] _map;
     private Map _map;
     
     void Start()
@@ -30,13 +29,7 @@ public class GameController : MonoBehaviour
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out hit, 100000.0f))
             {
-                for (int i = 0; i < _map.Width; ++i)
-                {
-                    for (int j = 0; j < _map.Height; ++j)
-                    {
-                        _map.Hexes[i, j].obj.renderer.material.color = _map.Hexes[i,j].color;
-                    }
-                }
+                _map.UpdateAllHexPrismsColor();
 
                 int row, col;
                 _map.SearchMap(hit.collider.gameObject, out row, out col);

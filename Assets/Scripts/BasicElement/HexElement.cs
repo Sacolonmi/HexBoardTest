@@ -8,12 +8,9 @@ public class HexElement{
 
     public HexElement(Color? colorValue = null)
     {
-        if (colorValue.HasValue)
-        {
+        if (colorValue.HasValue) {
             color = colorValue.Value;
-        }
-        else
-        {
+        } else {
             color = Color.white;
         }
     }

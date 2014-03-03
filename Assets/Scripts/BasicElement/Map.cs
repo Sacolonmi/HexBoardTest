@@ -162,4 +162,11 @@ public class Map{
         }
     }
 
+    public void UpdateAllHexPrismsColor()
+    {
+        foreach (var hexPrism in Hexes) {
+            hexPrism.obj.renderer.material.color = hexPrism.color;
+        }
+    }
+
 }
