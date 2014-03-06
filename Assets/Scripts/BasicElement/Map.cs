@@ -108,59 +108,84 @@ public class Map{
 
     public IEnumerable<Vector2> GetNeighbors( int row, int col )
     {
-        if (row >= 0 && col >= 0) {
-            if (row % 2 == 1) {
-                if (row - 1 >= 0 && col + 1 < _height) {
-                    if (_hexes[row - 1, col + 1].canPass) {
-                        yield return new Vector2(row - 1, col + 1);
-                    }
-                }
+        if (!isInBoard(row, col)) {
+            yield break;
+        }
 
-                if (row + 1 < _width && col + 1 < _height) {
-                    if (_hexes[row + 1, col + 1].canPass) {
-                        yield return new Vector2(row + 1, col + 1);
-                    }
-                }
-
-            } else {
-                if (row + 1 < _width && col - 1 >= 0) {
-                    if (_hexes[row + 1, col - 1].canPass) {
-                        yield return new Vector2(row + 1, col - 1);
-                    }
-                }
-
-                if (row - 1 >= 0 && col - 1 >= 0) {
-                    if (_hexes[row - 1, col - 1].canPass) {
-                        yield return new Vector2(row - 1, col - 1);
-                    }
-                }
+        if (row % 2 == 1) {
+            foreach (var v in GetOddNeighbors(row, col)) {
+                yield return v;
             }
 
-            if (row + 1 < _height) {
-                if (_hexes[row + 1, col].canPass) {
-                    yield return new Vector2(row + 1, col);
-                }
+        } else {
+            foreach (var v in GetEvenNeighbors(row, col)) {
+                yield return v;
             }
+        }
 
-            if (col + 1 < _height) {
-                if (_hexes[row, col + 1].canPass) {
-                    yield return new Vector2(row, col + 1);
-                }
-            }
+        foreach (var v in GetSharedNeighbors(row, col)) {
+            yield return v;
+        }
+        
+    }
 
-            if (row - 1 >= 0) {
-                if (_hexes[row - 1, col].canPass) {
-                    yield return new Vector2(row - 1, col);
-                }
-            }
+    IEnumerable<Vector2> GetOddNeighbors(int row, int col)
+    {
+        int[,] oddNeighbors = { { row - 1, col + 1 },
+                                { row + 1, col + 1 } };
 
-            if (col - 1 >= 0) {
-                if (_hexes[row, col - 1].canPass) {
-                    yield return new Vector2(row, col - 1);
-                }
+        for (int i = 0; i < oddNeighbors.Length; ++i) {
+            int x = oddNeighbors[i, 0], y = oddNeighbors[i, 1];
+            if (isInBoard(x, y) && _hexes[x, y].canPass) {
+                yield return new Vector2(x, y);
             }
         }
     }
+
+    IEnumerable<Vector2> GetEvenNeighbors(int row, int col)
+    {
+        int[,] evenNeighbors = { { row + 1, col - 1 },
+                                 { row - 1, col - 1 } };
+
+        for (int i = 0; i < evenNeighbors.Length; ++i)
+        {
+            int x = evenNeighbors[i, 0], y = evenNeighbors[i, 1];
+            if (isInBoard(x, y) && _hexes[x, y].canPass)
+            {
+                yield return new Vector2(x, y);
+            }
+        }
+    }
+
+    IEnumerable<Vector2> GetSharedNeighbors(int row, int col)
+    {
+        int[,] neighbors = { { row + 1, col },
+                             { row, col + 1 },
+                             { row - 1, col },
+                             { row, col - 1 } };
+
+        for (int i = 0; i < neighbors.Length; ++i)
+        {
+            int x = neighbors[i, 0], y = neighbors[i, 1];
+            if (isInBoard(x, y) && _hexes[x, y].canPass)
+            {
+                yield return new Vector2(x, y);
+            }
+        }
+    }
+
+    bool isInBoard(int row, int col)
+    {
+        return (row >= 0 && col >= 0 &&
+            row < Width && col < Height);
+    }
+
+    bool isGoable(int row, int col)
+    {
+        return isInBoard(row, col) &&
+            _hexes[row, col].canPass;
+    }
+
 
     public void UpdateAllHexPrismsColor()
     {
