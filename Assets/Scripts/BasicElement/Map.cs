@@ -136,7 +136,7 @@ public class Map{
 
         for (int i = 0; i < oddNeighbors.Length; ++i) {
             int x = oddNeighbors[i, 0], y = oddNeighbors[i, 1];
-            if (isInBoard(x, y) && _hexes[x, y].canPass) {
+            if (isGoable(x, y)) {
                 yield return new Vector2(x, y);
             }
         }
@@ -147,11 +147,9 @@ public class Map{
         int[,] evenNeighbors = { { row + 1, col - 1 },
                                  { row - 1, col - 1 } };
 
-        for (int i = 0; i < evenNeighbors.Length; ++i)
-        {
+        for (int i = 0; i < evenNeighbors.Length; ++i) {
             int x = evenNeighbors[i, 0], y = evenNeighbors[i, 1];
-            if (isInBoard(x, y) && _hexes[x, y].canPass)
-            {
+            if (isGoable(x, y)) {
                 yield return new Vector2(x, y);
             }
         }
@@ -164,11 +162,9 @@ public class Map{
                              { row - 1, col },
                              { row, col - 1 } };
 
-        for (int i = 0; i < neighbors.Length; ++i)
-        {
+        for (int i = 0; i < neighbors.Length; ++i) {
             int x = neighbors[i, 0], y = neighbors[i, 1];
-            if (isInBoard(x, y) && _hexes[x, y].canPass)
-            {
+            if (isGoable(x, y)) {
                 yield return new Vector2(x, y);
             }
         }
