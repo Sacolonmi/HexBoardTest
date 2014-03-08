@@ -7,6 +7,11 @@ public class Map{
     private int _width, _height;
     private GameObject _hexPrism;
 
+	/* test coding */
+	private Player[] _player;
+
+	private Vector3 _origin; 
+
     public HexElement[,] Hexes{
         set { _hexes = value; }
         get { return _hexes; }
@@ -36,40 +41,72 @@ public class Map{
         {
             for (int j = 0 ; j < height ; ++j)
             {
-                _hexes[i, j] = new HexElement();
+                _hexes[i, j] = new Grass();
             }
         }
     }
+
+	public Map(GameObject hexPrism, GameObject playerObj, int width = 10, int height = 10 )
+	{
+		_hexPrism = hexPrism;
+		_width = width;
+		_height = height;
+		
+        _hexes = new HexElement[width, height];
+		
+		for (int i = 0 ; i < width ; ++i)
+		{
+			for (int j = 0 ; j < height ; ++j)
+			{
+                int type = Random.Range(0,99) % 3;
+                switch(type){
+                    case 1:
+                        _hexes[i, j] = new Mud();
+                        break;
+                    case 2:
+                        _hexes[i, j] = new Grass();
+                        break;
+                    default:
+                        _hexes[i, j] = new Block();
+                        break;
+
+                }
+			}
+		}
+		
+		_player = new Player[1];
+		_player[0] = new Player (playerObj, 0, 0);
+		
+	}
 
     public void GenerateHexPrism(GameController gc, Vector3? originValue = null)
     {
         Vector3 origin = Vector3.zero;
         if (originValue.HasValue) origin = originValue.Value;
+		_origin = origin;
 
         for (int row = 0 ; row < _width ; ++row) {
             for (int col = 0 ; col < _height ; ++col) {
                 Vector3 position;
                 Quaternion rotation = Quaternion.Euler(270, 0, 0);
-                if (row % 2 == 0) {
-                    position = origin + new Vector3(col * 3.0f, 0.0f, row * 1.5f * Mathf.Sqrt(3));
 
-                } else {
-                    position = origin + new Vector3(col * 3.0f + 1.5f, 0.0f, row * 1.5f * Mathf.Sqrt(3));
-                }
+                position = TransformCoordinate(row, col);// origin + new Vector3(col * 3.0f (+ 1.5f), 0.0f, row * 1.5f * Mathf.Sqrt(3));
                 _hexes[row,col].obj = gc.MakeObject(_hexPrism, position, rotation);
+                _hexes[row, col].obj.transform.localScale = new Vector3(1.0f, 1.0f, _hexes[row, col].height);
+                _hexes[row, col].obj.renderer.material.color = _hexes[row, col].color;
             }
         }
+    }
 
-        for (int i = 0; i < 10; ++i) {
-            if (i != 4) {
-                _hexes[5, i].SetNotPass();
-            }
-        }
+	public void GeneratePlayer(GameController gc){
+		for (int i = 0; i < _player.Length; ++i) {
+			_player[i].RealObj = gc.MakeObject(_player[i].Obj, new Vector3(0.0f, 2.0f, 0.0f) + TransformCoordinate(_player[i].Row, _player[i].Col), Quaternion.Euler(270, 0, 0));
+		}
+	}
 
-        _hexes[4, 1].SetNotPass();
-        _hexes[4, 3].SetNotPass();
-        _hexes[3, 2].SetNotPass();
-        _hexes[3, 1].SetNotPass();
+    public Vector3 TransformCoordinate(int row, int col)
+    {
+        return _origin + new Vector3(col * 3.0f + ((row % 2 == 1)? 1.5f : 0.0f), 0.0f, row * 1.5f * Mathf.Sqrt(3));
     }
 
     public void SearchMap(GameObject obj, out int rowOutput, out int colOutput)
@@ -88,22 +125,34 @@ public class Map{
         colOutput = -1;
     }
 
-    public IEnumerable<Vector2> GetNeighborsByLength(int row, int col, int length, bool[,] check)
+    public void SearchPlayer(GameObject obj, out Player player)
     {
-        if (length <= 0) throw new System.Exception("Length can not be 0.");
-
-        check[row, col] = true;
-        foreach(var neighbor in GetNeighbors(row,col)){
-            if( !check[(int)neighbor.x,(int)neighbor.y] ) {
-                yield return neighbor;
-            }
-            if (length > 1)
+        for (int i = 0; i < _player.Length; ++i)
+        {
+            if (obj == _player[i].RealObj)
             {
-                foreach (var otherNeighbor in GetNeighborsByLength((int)neighbor.x, (int)neighbor.y, length - 1, check)) {
-                    yield return otherNeighbor;
-                }
+                player = _player[i];
+                return;
             }
         }
+
+        player = null;
+    }
+
+    public IEnumerable<Vector2> GetNeighborsByLength(int row, int col, int length, bool[,] check)
+    {
+        if (length > 0) {
+			check [row, col] = true;
+			foreach (var neighbor in GetNeighbors(row,col)) {
+				if (!check [(int)neighbor.x, (int)neighbor.y]) {
+					yield return neighbor;
+				}
+                foreach (var otherNeighbor in GetNeighborsByLength((int)neighbor.x, (int)neighbor.y, length - _hexes[(int)neighbor.x, (int)neighbor.y].cost, check))
+                {
+				    yield return otherNeighbor;
+				}
+			}
+		}
     }
 
     public IEnumerable<Vector2> GetNeighbors( int row, int col )
